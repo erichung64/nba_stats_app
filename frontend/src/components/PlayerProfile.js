@@ -3,19 +3,42 @@ import React, { useState, useEffect } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, CircularProgress,
     Typography, Grid, Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, Paper
+    TableContainer, TableHead, TableRow, Paper, Tooltip, Box
 } from '@mui/material';
 import { Bar, Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale, LinearScale, BarElement,
-    LineElement, PointElement, Title, Tooltip, Legend
+    LineElement, PointElement, Title, Tooltip as ChartTooltip, Legend
 } from 'chart.js';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, ChartTooltip, Legend);
+
+const tooltips = {
+    MIN: "Minutes per game",
+    FGM: "Field Goals Made per game",
+    FGA: "Field Goals Attempted per game",
+    FG_PCT: "Field Goal Percentage",
+    FG3M: "Three-Point Field Goals Made per game",
+    FG3A: "Three-Point Field Goals Attempted per game",
+    FG3_PCT: "Three-Point Field Goal Percentage",
+    FTM: "Free Throws Made per game",
+    FTA: "Free Throws Attempted per game",
+    FT_PCT: "Free Throw Percentage",
+    OREB: "Offensive Rebounds per game",
+    DREB: "Defensive Rebounds per game",
+    REB: "Total Rebounds per game",
+    AST: "Assists per game",
+    STL: "Steals per game",
+    BLK: "Blocks per game",
+    TOV: "Turnovers per game",
+    PF: "Personal Fouls per game",
+    PTS: "Points per game",
+    PLAYER_AGE: "Player Age"
+};
 
 const PlayerProfile = ({ playerId, onClose }) => {
-    const [careerAverages, setCareerAverages] = useState(null);
+    const [perGameAverages, setPerGameAverages] = useState(null);
     const [seasonStats, setSeasonStats] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -25,7 +48,7 @@ const PlayerProfile = ({ playerId, onClose }) => {
             fetch(`http://localhost:8000/players/${playerId}`)
                 .then(response => response.json())
                 .then(data => {
-                    setCareerAverages(data.career_averages);
+                    setPerGameAverages(data.per_game_averages);
                     setSeasonStats(data.season_stats);
                     setLoading(false);
                 })
@@ -93,57 +116,105 @@ const PlayerProfile = ({ playerId, onClose }) => {
         };
     };
 
+    const renderTable = (title, stats) => (
+        <Grid item xs={12} sm={6}>
+            <Typography variant="subtitle1" gutterBottom>
+                {title}
+            </Typography>
+            <TableContainer component={Paper}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Category</TableCell>
+                            <TableCell align="right">Value</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {Object.entries(stats).map(([key, value]) => (
+                            <TableRow key={key}>
+                                <TableCell component="th" scope="row">
+                                    <Tooltip title={tooltips[key] || key} placement="top">
+                                        <span>{key}</span>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell align="right">{typeof value === 'number' ? value.toFixed(2) : value}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Grid>
+    );
+
+    const shootingStats = {
+        FGM: perGameAverages?.FGM,
+        FGA: perGameAverages?.FGA,
+        FG_PCT: perGameAverages?.FG_PCT,
+        FG3M: perGameAverages?.FG3M,
+        FG3A: perGameAverages?.FG3A,
+        FG3_PCT: perGameAverages?.FG3_PCT,
+        FTM: perGameAverages?.FTM,
+        FTA: perGameAverages?.FTA,
+        FT_PCT: perGameAverages?.FT_PCT,
+    };
+
+    const reboundingStats = {
+        OREB: perGameAverages?.OREB,
+        DREB: perGameAverages?.DREB,
+        REB: perGameAverages?.REB,
+    };
+
+    const defensiveStats = {
+        STL: perGameAverages?.STL,
+        BLK: perGameAverages?.BLK,
+        PF: perGameAverages?.PF,
+    };
+
+    const miscStats = {
+        MIN: perGameAverages?.MIN,
+        PTS: perGameAverages?.PTS,
+        AST: perGameAverages?.AST,
+        TOV: perGameAverages?.TOV,
+        PLAYER_AGE: perGameAverages?.PLAYER_AGE,
+    };
+
     return (
-        <Dialog open={Boolean(playerId)} onClose={onClose} maxWidth="md" fullWidth>
+        <Dialog open={Boolean(playerId)} onClose={onClose} maxWidth="lg" fullWidth>
             <DialogTitle>Player Stats</DialogTitle>
             <DialogContent>
                 {loading ? (
                     <CircularProgress />
                 ) : (
                     <>
-                        {careerAverages && seasonStats.length > 0 ? (
+                        {perGameAverages && seasonStats.length > 0 ? (
                             <>
-                                <Typography variant="h6" gutterBottom>
-                                    {seasonStats[0].PLAYER_NAME} Career Stats
-                                </Typography>
-                                <Grid container spacing={3}>
+                                <Grid container spacing={1}>
                                     <Grid item xs={12} md={6}>
                                         <Typography variant="subtitle1" gutterBottom>
                                             Points, Assists, Rebounds by Season
                                         </Typography>
-                                        <Bar key={`bar-${playerId}`} data={getBarChartData()} />
+                                        <Box sx={{ height: 300, padding: 0 }}>
+                                            <Bar key={`bar-${playerId}`} data={getBarChartData()} options={{ maintainAspectRatio: false }} />
+                                        </Box>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
                                         <Typography variant="subtitle1" gutterBottom>
                                             Shooting Percentages by Season
                                         </Typography>
-                                        <Line key={`line-${playerId}`} data={getLineChartData()} />
+                                        <Box sx={{ height: 300, padding: 0 }}>
+                                            <Line key={`line-${playerId}`} data={getLineChartData()} options={{ maintainAspectRatio: false }} />
+                                        </Box>
                                     </Grid>
-                                    <Grid item xs={12}>
-                                        <Typography variant="subtitle1" gutterBottom>
-                                            Career Averages
-                                        </Typography>
-                                        <TableContainer component={Paper}>
-                                            <Table>
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell>Category</TableCell>
-                                                        <TableCell align="right">Value</TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {Object.entries(careerAverages).map(([key, value]) => (
-                                                        <TableRow key={key}>
-                                                            <TableCell component="th" scope="row">
-                                                                {key}
-                                                            </TableCell>
-                                                            <TableCell align="right">{value}</TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
-                                    </Grid>
+                                </Grid>
+                                <hr style={{ margin: '10px 0' }} />
+                                <Typography variant="h6" gutterBottom>
+                                    {seasonStats[0].PLAYER_NAME} Career Per Game Stats
+                                </Typography>
+                                <Grid container spacing={1}>
+                                    {renderTable('Shooting Stats', shootingStats)}
+                                    {renderTable('Overall Stats', miscStats)}
+                                    {renderTable('Defensive Stats', defensiveStats)}
+                                    {renderTable('Rebounding Stats', reboundingStats)}
                                 </Grid>
                             </>
                         ) : (
@@ -153,7 +224,7 @@ const PlayerProfile = ({ playerId, onClose }) => {
                 )}
             </DialogContent>
         </Dialog>
-    );
+    );    
 };
 
 export default PlayerProfile;
