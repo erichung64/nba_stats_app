@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { List, ListItem, ListItemButton, ListItemText, Container, Typography, Box } from '@mui/material';
+import { List, ListItem, ListItemButton, ListItemText, Container, Typography } from '@mui/material';
 
 const PlayerList = ({ players, onSelectPlayer }) => {
     const [displayedPlayers, setDisplayedPlayers] = useState([]);

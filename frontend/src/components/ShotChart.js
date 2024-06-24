@@ -52,7 +52,7 @@ const ShotChart = ({ playerId, season, seasonType }) => {
 
             const color = d3.scaleSequential()
                 .domain([0, d3.max(bins, d => d.length)])
-                .interpolator(d3.interpolateRgbBasis(["#dfefff", "#0a4177"])); // Define a custom interpolator with darker blues
+                .interpolator(d3.interpolateRgbBasis(["#c0ddff", "#0a4177"]));
 
             svg.append('g')
                 .selectAll('path')
