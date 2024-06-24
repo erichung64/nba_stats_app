@@ -29,16 +29,16 @@ const App = () => {
 
     return (
         <Container>
-            <AppBar position="static" color="default" sx={{ mb: 2 }}>
+            <AppBar position="static" sx={{ mb: 2, backgroundColor: 'white', color: 'black' }}>
                 <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600, fontSize: '2rem' }}>
                         NBA Player Stats
                     </Typography>
                     <IconButton edge="end" color="inherit" aria-label="menu">
                         <img src="/logo.png" alt="logo" style={{ height: '60px' }} />
                     </IconButton>
                 </Toolbar>
-            </AppBar>
+            </AppBar>            
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <FormControl variant="outlined" sx={{ minWidth: 120 }}>
                     <InputLabel id="season-label">Season</InputLabel>
@@ -48,7 +48,7 @@ const App = () => {
                         onChange={(e) => setSeason(e.target.value)}
                         label="Season"
                     >
-                        {Array.from({ length: 9 }, (_, i) => (
+                        {Array.from({ length: 14 }, (_, i) => (
                             <MenuItem key={i} value={`${2023 - i}-${(2024 - i).toString().slice(-2)}`}>
                                 {2023 - i}-{(2024 - i).toString().slice(-2)}
                             </MenuItem>
@@ -71,7 +71,14 @@ const App = () => {
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
             <div style={{ margin: '10px' }}></div>
             <PlayerList players={filteredPlayers} onSelectPlayer={setSelectedPlayerId} />
-            <PlayerProfile playerId={selectedPlayerId} onClose={() => setSelectedPlayerId(null)} />
+            {selectedPlayerId && (
+                <PlayerProfile 
+                    playerId={selectedPlayerId}
+                    season={season}
+                    seasonType={seasonType}
+                    onClose={() => setSelectedPlayerId(null)} 
+                />
+            )}
         </Container>
     );
 };

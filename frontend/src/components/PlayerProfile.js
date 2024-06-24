@@ -1,4 +1,3 @@
-// frontend/src/components/PlayerProfile.js
 import React, { useState, useEffect } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, CircularProgress,
@@ -11,10 +10,16 @@ import {
     CategoryScale, LinearScale, BarElement,
     LineElement, PointElement, Title, Tooltip as ChartTooltip, Legend
 } from 'chart.js';
+import ShotChart from './ShotChart'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, ChartTooltip, Legend);
 
-const tooltips = {
+const lastNGamesTooltips = {
+    GROUP_VALUE: "Season",
+    GP: "Games Played",
+    W: "Wins",
+    L: "Losses",
+    W_PCT: "Win Percentage",
     MIN: "Minutes per game",
     FGM: "Field Goals Made per game",
     FGA: "Field Goals Attempted per game",
@@ -29,25 +34,32 @@ const tooltips = {
     DREB: "Defensive Rebounds per game",
     REB: "Total Rebounds per game",
     AST: "Assists per game",
+    TOV: "Turnovers per game",
     STL: "Steals per game",
     BLK: "Blocks per game",
-    TOV: "Turnovers per game",
-    PF: "Personal Fouls per game",
+    BLKA: "Blocked Attempts",
+    PF: "Personal Fouls",
+    PFD: "Personal Fouls Drawn",
     PTS: "Points per game",
-    PLAYER_AGE: "Player Age"
+    PLUS_MINUS: "Plus/Minus",
 };
 
-const PlayerProfile = ({ playerId, onClose }) => {
+
+const PlayerProfile = ({ playerId, season, seasonType, onClose }) => {
     const [perGameAverages, setPerGameAverages] = useState(null);
     const [seasonStats, setSeasonStats] = useState([]);
+    const [playerName, setPlayerName] = useState([]);
+    const [lastNGamesStats, setLastNGamesStats] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingLastNGames, setLoadingLastNGames] = useState(false);
 
     useEffect(() => {
         if (playerId) {
             setLoading(true);
-            fetch(`http://localhost:8000/players/${playerId}`)
+            fetch(`http://localhost:8000/players/${playerId}?season=${season}&season_type=${seasonType}`)
                 .then(response => response.json())
                 .then(data => {
+                    setPlayerName(data.player_name);  // Set the player's name
                     setPerGameAverages(data.per_game_averages);
                     setSeasonStats(data.season_stats);
                     setLoading(false);
@@ -56,10 +68,22 @@ const PlayerProfile = ({ playerId, onClose }) => {
                     console.error('Error fetching player stats:', error);
                     setLoading(false);
                 });
+    
+            setLoadingLastNGames(true);
+            fetch(`http://localhost:8000/players/${playerId}/last_n_games?last_n_games=10&season=${season}&season_type=${seasonType}`)
+                .then(response => response.json())
+                .then(data => {
+                    setLastNGamesStats(data);
+                    setLoadingLastNGames(false);
+                })
+                .catch(error => {
+                    console.error('Error fetching player last n games stats:', error);
+                    setLoadingLastNGames(false);
+                });
         }
-    }, [playerId]);
+    }, [playerId, season, seasonType]);
 
-    const getBarChartData = () => {
+        const getBarChartData = () => {
         const seasons = seasonStats.map(stat => stat.SEASON_ID);
         const points = seasonStats.map(stat => stat.PTS);
         const assists = seasonStats.map(stat => stat.AST);
@@ -123,19 +147,11 @@ const PlayerProfile = ({ playerId, onClose }) => {
             </Typography>
             <TableContainer component={Paper}>
                 <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Category</TableCell>
-                            <TableCell align="right">Value</TableCell>
-                        </TableRow>
-                    </TableHead>
                     <TableBody>
                         {Object.entries(stats).map(([key, value]) => (
                             <TableRow key={key}>
                                 <TableCell component="th" scope="row">
-                                    <Tooltip title={tooltips[key] || key} placement="top">
-                                        <span>{key}</span>
-                                    </Tooltip>
+                                    <span>{key}</span>
                                 </TableCell>
                                 <TableCell align="right">{typeof value === 'number' ? value.toFixed(2) : value}</TableCell>
                             </TableRow>
@@ -145,9 +161,51 @@ const PlayerProfile = ({ playerId, onClose }) => {
             </TableContainer>
         </Grid>
     );
+    
 
+    const renderLastNGamesTable = (stats) => (
+        <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+                Last 10 Games Stats
+            </Typography>
+            {loadingLastNGames ? (
+                <CircularProgress />
+            ) : (
+                <TableContainer component={Paper}>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                {Object.keys(stats[0]).map((key) => (
+                                    <TableCell key={key}>
+                                        <Tooltip title={lastNGamesTooltips[key] || key} placement="top">
+                                            <span>{key}</span>
+                                        </Tooltip>
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {stats.map((game, index) => (
+                                <TableRow key={index}>
+                                    {Object.entries(game).map(([key, value]) => (
+                                        <TableCell key={key}>
+                                            <Tooltip title={lastNGamesTooltips[key] || key} placement="top">
+                                                <span>{value}</span>
+                                            </Tooltip>
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )}
+        </Grid>
+    );
+    
+    
     const shootingStats = {
-        FGM: perGameAverages?.FGM,
+        FM: perGameAverages?.FGM,
         FGA: perGameAverages?.FGA,
         FG_PCT: perGameAverages?.FG_PCT,
         FG3M: perGameAverages?.FG3M,
@@ -175,12 +233,12 @@ const PlayerProfile = ({ playerId, onClose }) => {
         PTS: perGameAverages?.PTS,
         AST: perGameAverages?.AST,
         TOV: perGameAverages?.TOV,
-        PLAYER_AGE: perGameAverages?.PLAYER_AGE,
+        Age: perGameAverages?.PLAYER_AGE,
     };
 
     return (
         <Dialog open={Boolean(playerId)} onClose={onClose} maxWidth="lg" fullWidth>
-            <DialogTitle>Player Stats</DialogTitle>
+            <DialogTitle>{playerName} Player Stats</DialogTitle>
             <DialogContent>
                 {loading ? (
                     <CircularProgress />
@@ -188,27 +246,42 @@ const PlayerProfile = ({ playerId, onClose }) => {
                     <>
                         {perGameAverages && seasonStats.length > 0 ? (
                             <>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={12} md={6}>
-                                        <Typography variant="subtitle1" gutterBottom>
-                                            Points, Assists, Rebounds by Season
-                                        </Typography>
-                                        <Box sx={{ height: 300, padding: 0 }}>
-                                            <Bar key={`bar-${playerId}`} data={getBarChartData()} options={{ maintainAspectRatio: false }} />
-                                        </Box>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <Typography variant="subtitle1" gutterBottom>
-                                            Shooting Percentages by Season
-                                        </Typography>
-                                        <Box sx={{ height: 300, padding: 0 }}>
-                                            <Line key={`line-${playerId}`} data={getLineChartData()} options={{ maintainAspectRatio: false }} />
-                                        </Box>
-                                    </Grid>
+                            <Grid container spacing={1}>
+                                <Grid item xs={12} md={4}>
+                                    <Typography variant="subtitle1" gutterBottom>
+                                        Points, Assists, Rebounds by Season
+                                    </Typography>
+                                    <Box sx={{ height: 300, padding: 0 }}>
+                                        <Bar key={`bar-${playerId}`} data={getBarChartData()} options={{ maintainAspectRatio: false }} />
+                                    </Box>
                                 </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <Typography variant="subtitle1" gutterBottom>
+                                        Shooting Percentages by Season
+                                    </Typography>
+                                    <Box sx={{ height: 300, padding: 0 }}>
+                                        <Line key={`line-${playerId}`} data={getLineChartData()} options={{ maintainAspectRatio: false }} />
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <Typography variant="subtitle1" gutterBottom>
+                                        Shot Chart
+                                    </Typography>
+                                    <Box sx={{ height: 300, width: 250, padding: 0 }}>
+                                        <ShotChart playerId={playerId} season={season} seasonType={seasonType} width={250} height={300} />
+                                    </Box>
+                                </Grid>
+                            </Grid>
+
+                                {lastNGamesStats.length > 0 && (
+                                    <>
+                                        <hr style={{ margin: '10px 0' }} />
+                                        {renderLastNGamesTable(lastNGamesStats)}
+                                    </>
+                                )}
                                 <hr style={{ margin: '10px 0' }} />
                                 <Typography variant="h6" gutterBottom>
-                                    {seasonStats[0].PLAYER_NAME} Career Averages
+                                    Career Averages
                                 </Typography>
                                 <Grid container spacing={1}>
                                     {renderTable('Shooting Stats', shootingStats)}
@@ -224,7 +297,7 @@ const PlayerProfile = ({ playerId, onClose }) => {
                 )}
             </DialogContent>
         </Dialog>
-    );    
+    );
 };
 
 export default PlayerProfile;
