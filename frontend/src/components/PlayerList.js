@@ -1,50 +1,34 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { List, ListItem, ListItemButton, ListItemText, Button, ButtonGroup, Container, Typography, Box } from '@mui/material';
+import { List, ListItem, ListItemButton, ListItemText, Container, Typography, Box } from '@mui/material';
 
 const PlayerList = ({ players, onSelectPlayer }) => {
-    const [filter, setFilter] = useState('all');
     const [displayedPlayers, setDisplayedPlayers] = useState([]);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(0);
     const itemsPerPage = 20;
 
-    const filteredPlayers = useMemo(() => {
-        return players.filter(player => {
-            if (filter === 'active') return player.is_active;
-            if (filter === 'inactive') return !player.is_active;
-            return true;
-        });
-    }, [players, filter]);
-
     useEffect(() => {
-        setDisplayedPlayers(filteredPlayers.slice(0, itemsPerPage));
+        setDisplayedPlayers(players.slice(0, itemsPerPage));
         setPage(1);
-        setHasMore(filteredPlayers.length > itemsPerPage);
-    }, [filter, filteredPlayers]);
+        setHasMore(players.length > itemsPerPage);
+    }, [players]);
 
     const fetchMoreData = () => {
-        if (displayedPlayers.length >= filteredPlayers.length) {
+        if (displayedPlayers.length >= players.length) {
             setHasMore(false);
             return;
         }
 
         setDisplayedPlayers(prevDisplayedPlayers => [
             ...prevDisplayedPlayers,
-            ...filteredPlayers.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
+            ...players.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
         ]);
         setPage(prevPage => prevPage + 1);
     };
 
     return (
         <Container>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                    <Button onClick={() => setFilter('all')}>All</Button>
-                    <Button onClick={() => setFilter('active')}>Active</Button>
-                    <Button onClick={() => setFilter('inactive')}>Inactive</Button>
-                </ButtonGroup>
-            </Box>
             <InfiniteScroll
                 dataLength={displayedPlayers.length}
                 next={fetchMoreData}
@@ -58,9 +42,24 @@ const PlayerList = ({ players, onSelectPlayer }) => {
             >
                 <List>
                     {displayedPlayers.map(player => (
-                        <ListItem key={player.id}>
-                            <ListItemButton onClick={() => onSelectPlayer(player.id)}>
-                                <ListItemText primary={player.full_name} />
+                        <ListItem key={player.PLAYER_ID}>
+                            <ListItemButton onClick={() => onSelectPlayer(player.PLAYER_ID)}>
+                                <ListItemText
+                                    primary={player.PLAYER_NAME}
+                                    secondary={
+                                        <>
+                                            <Typography component="span" variant="body2" color="textPrimary">
+                                                {player.TEAM_ABBREVIATION} - Age: {player.AGE} - Height: {player.PLAYER_HEIGHT} - Weight: {player.PLAYER_WEIGHT}
+                                            </Typography>
+                                            <Typography component="span" variant="body2" color="textSecondary">
+                                                {} College: {player.COLLEGE} - Draft Year: {player.DRAFT_YEAR}
+                                            </Typography>
+                                            <Typography component="span" variant="body2" color="textSecondary">
+                                                {} PTS: {player.PTS} - REB: {player.REB} - AST: {player.AST}
+                                            </Typography>
+                                        </>
+                                    }
+                                />
                             </ListItemButton>
                         </ListItem>
                     ))}

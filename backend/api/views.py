@@ -1,6 +1,5 @@
-from fastapi import APIRouter, HTTPException
-from nba_api.stats.endpoints import playercareerstats
-from nba_api.stats.static import players
+from fastapi import APIRouter, HTTPException, Query
+from nba_api.stats.endpoints import playercareerstats, leaguedashplayerbiostats
 import pandas as pd
 
 router = APIRouter()
@@ -48,9 +47,18 @@ async def get_player_stats(player_id: int):
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/players")
-async def get_all_players():
+async def get_all_players(
+    season: str = Query(..., description="The NBA season in the format YYYY-YY."),
+    season_type: str = Query(..., description="The type of NBA season.", regex="^(Regular Season|Playoffs)$")
+):
     try:
-        all_players = players.get_players()
-        return all_players
+        stats = leaguedashplayerbiostats.LeagueDashPlayerBioStats(
+            season=season,
+            per_mode_simple='PerGame',
+            season_type_all_star=season_type
+        )
+        df = stats.get_data_frames()[0]
+        return df.to_dict(orient='records')
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

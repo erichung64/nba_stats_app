@@ -208,7 +208,7 @@ const PlayerProfile = ({ playerId, onClose }) => {
                                 </Grid>
                                 <hr style={{ margin: '10px 0' }} />
                                 <Typography variant="h6" gutterBottom>
-                                    {seasonStats[0].PLAYER_NAME} Career Per Game Stats
+                                    {seasonStats[0].PLAYER_NAME} Career Averages
                                 </Typography>
                                 <Grid container spacing={1}>
                                     {renderTable('Shooting Stats', shootingStats)}
