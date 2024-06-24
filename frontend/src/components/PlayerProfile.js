@@ -272,13 +272,6 @@ const PlayerProfile = ({ playerId, season, seasonType, onClose }) => {
                                     </Box>
                                 </Grid>
                             </Grid>
-
-                                {lastNGamesStats.length > 0 && (
-                                    <>
-                                        <hr style={{ margin: '10px 0' }} />
-                                        {renderLastNGamesTable(lastNGamesStats)}
-                                    </>
-                                )}
                                 <hr style={{ margin: '10px 0' }} />
                                 <Typography variant="h6" gutterBottom>
                                     Career Averages
@@ -289,6 +282,12 @@ const PlayerProfile = ({ playerId, season, seasonType, onClose }) => {
                                     {renderTable('Defensive Stats', defensiveStats)}
                                     {renderTable('Rebounding Stats', reboundingStats)}
                                 </Grid>
+                                {lastNGamesStats.length > 0 && (
+                                    <>
+                                        <hr style={{ margin: '10px 0' }} />
+                                        {renderLastNGamesTable(lastNGamesStats)}
+                                    </>
+                                )}
                             </>
                         ) : (
                             <Typography>No stats available</Typography>
