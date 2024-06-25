@@ -35,8 +35,8 @@ The backend is built using FastAPI and the `nba_api` library. It serves player d
 - **Endpoints**:
   - `/players`: Returns a list of all players.
   - `/players/{player_id}`: Returns career statistics for a specified player.
-  - `GET /players/{player_id}/last_n_games`: Fetches last 'n' games for a specific player, currently set to 10. 
-  - `GET /players/{player_id}/shot_chart`: Gets shot chart data for a specific player in a specific season
+  - `/players/{player_id}/last_n_games`: Fetches last 'n' games for a specific player, currently set to 10. 
+  - `/players/{player_id}/shot_chart`: Gets shot chart data for a specific player in a specific season
 
 ### Frontend
 The frontend is built using React and Material-UI for the UI components, and Chart.js via `react-chartjs-2` for data visualization.
