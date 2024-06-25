@@ -29,9 +29,9 @@ const App = () => {
 
     return (
         <Container>
-            <AppBar position="static" sx={{ mb: 2, mt: 1, backgroundColor: 'white', color: 'black' }}>
+            <AppBar position="static" sx={{ boxShadow: 0, mb: 2, mt: 1, backgroundColor: 'white', color: 'black' }}>
                 <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600, fontSize: '2rem' }}>
+                    <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 300, fontSize: '2rem' }}>
                         NBA Player Stats
                     </Typography>
                     <IconButton edge="end" color="inherit" aria-label="menu">
