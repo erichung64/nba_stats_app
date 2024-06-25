@@ -1,7 +1,7 @@
 # NBA Stats App
 
 ## Overview
-This application fetches, processes, and displays NBA player statistics. Users can search for players, filter by active or inactive status, and view detailed career statistics and season-by-season performance in various visual formats.
+This application fetches, processes, and displays NBA player statistics. Users can search for players, and view detailed career statistics and season-by-season performance in various visual formats.
 
 ## Setup and Run
 
