@@ -22,7 +22,7 @@ This application fetches, processes, and displays NBA player statistics. Users c
 5. Access the frontend at `http://localhost:3000`.
 
 ## Frontend Features
-- **Search and Filter**: Users can search for players by name and filter by active or inactive status.
+- **Search and Filter**: Users can search for players by name and filter by season and season type.
 - **Player List**: Displays a list of players with clickable names.
 - **Player Profile**: Shows detailed career and season statistics in a modal dialog with bar and line charts.
 - **Responsive Design**: The application is designed to be responsive and user-friendly.
