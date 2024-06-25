@@ -26,8 +26,8 @@ const ShotChart = ({ playerId, season, seasonType }) => {
         }
     }, [playerId, season, seasonType]);
 
-    const courtWidth = 300;
-    const courtHeight = 282;
+    const courtWidth = 340;
+    const courtHeight = 320;
     const xScale = d3.scaleLinear().domain([-250, 250]).range([0, courtWidth]);
     const yScale = d3.scaleLinear().domain([-47.5, 422.5]).range([courtHeight, 0]);
 

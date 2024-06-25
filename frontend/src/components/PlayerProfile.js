@@ -110,31 +110,55 @@ const PlayerProfile = ({ playerId, season, seasonType, onClose }) => {
       return { barChartData, lineChartData };
     }, [playerData.seasonStats]);
   
-    const renderTable = (title, stats) => (
-      <Grid item xs={12} sm={6}>
-        <Typography variant="subtitle1" gutterBottom>{title}</Typography>
-        <TableContainer component={Paper}>
-          <Table size="small">
-            <TableBody>
-              {Object.entries(stats).map(([key, value]) => (
-                <TableRow key={key}>
-                  <TableCell component="th" scope="row">
-                    <Tooltip title={lastNGamesTooltips[key] || key} placement="top">
-                      <span>{key}</span>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell align="right">{typeof value === 'number' ? value.toFixed(2) : value}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Grid>
+    const renderChart = (title, chart) => (
+        <Box sx={{
+            backgroundColor: '#f5f5f5',
+            borderRadius: '8px',
+            padding: '16px',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column'
+        }}>
+            <Typography variant="subtitle1" gutterBottom>{title}</Typography>
+            <Box sx={{ height: 300, width: '100%' }}>
+                {chart}
+            </Box>
+        </Box>
     );
+
+
+    const renderTable = (title, stats) => (
+        <TableContainer component={Paper} sx={{ height: '100%' }}>
+            <Table size="small" stickyHeader>
+                <TableHead>
+                    <TableRow>
+                        <TableCell colSpan={2}>
+                            <Typography variant="subtitle2">{title}</Typography>
+                        </TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {Object.entries(stats).map(([key, value]) => (
+                        <TableRow key={key}>
+                            <TableCell component="th" scope="row" sx={{ padding: '4px 8px' }}>
+                                <Tooltip title={lastNGamesTooltips[key] || key} placement="top">
+                                    <span>{key}</span>
+                                </Tooltip>
+                            </TableCell>
+                            <TableCell align="right" sx={{ padding: '4px 8px' }}>
+                                {typeof value === 'number' ? value.toFixed(2) : value}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
+    );
+
   
     const renderLastNGamesTable = () => (
       <Grid item xs={12}>
-        <Typography variant="h6" gutterBottom>Last 10 Games Stats</Typography>
+        
         {loading.lastNGames ? (
           <CircularProgress />
         ) : (
@@ -204,56 +228,55 @@ const PlayerProfile = ({ playerId, season, seasonType, onClose }) => {
     }), [perGameAverages]);
   
     return (
-      <Dialog open={Boolean(playerId)} onClose={onClose} maxWidth="lg" fullWidth>
-        <DialogTitle>{playerData.playerName} Player Stats</DialogTitle>
-        <DialogContent>
-          {loading.main ? (
-            <CircularProgress />
-          ) : (
-            <>
-              {perGameAverages && playerData.seasonStats.length > 0 ? (
-                <>
-                  <Grid container spacing={1}>
-                    <Grid item xs={12} md={4}>
-                      <Typography variant="subtitle1" gutterBottom>Points, Assists, Rebounds by Season</Typography>
-                      <Box sx={{ height: 300, padding: 0 }}>
-                        {barChartData && <Bar data={barChartData} options={{ maintainAspectRatio: false }} />}
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <Typography variant="subtitle1" gutterBottom>Shooting Percentages by Season</Typography>
-                      <Box sx={{ height: 300, padding: 0 }}>
-                        {lineChartData && <Line data={lineChartData} options={{ maintainAspectRatio: false }} />}
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <Typography variant="subtitle1" gutterBottom>Shot Chart</Typography>
-                      <Box sx={{ height: 300, width: 250, padding: 0 }}>
-                        <ShotChart playerId={playerId} season={season} seasonType={seasonType} width={250} height={300} />
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <hr style={{ margin: '10px 0' }} />
-                  <Typography variant="h6" gutterBottom>Career Averages</Typography>
-                  <Grid container spacing={1}>
-                    {Object.entries(statsCategories).map(([category, stats]) => renderTable(category, stats))}
-                  </Grid>
-                  {playerData.lastNGamesStats.length > 0 && (
+        <Dialog open={Boolean(playerId)} onClose={onClose} maxWidth="lg" fullWidth>
+            <DialogTitle>{playerData.playerName} Player Stats</DialogTitle>
+            <DialogContent>
+                {loading.main ? (
+                    <CircularProgress />
+                ) : (
                     <>
-                      <hr style={{ margin: '10px 0' }} />
-                      {renderLastNGamesTable()}
+                        {perGameAverages && playerData.seasonStats.length > 0 ? (
+                            <>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={4}>
+                                        {renderChart("Points, Assists, Rebounds by Season",
+                                            <Bar data={barChartData} options={{ maintainAspectRatio: false }} />
+                                        )}
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        {renderChart("Shooting Percentages by Season",
+                                            <Line data={lineChartData} options={{ maintainAspectRatio: false }} />
+                                        )}
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        {renderChart("Shot Chart",
+                                            <ShotChart playerId={playerId} season={season} seasonType={seasonType} width={280} height={300} />
+                                        )}
+                                    </Grid>
+                                </Grid>
+                                <Typography variant="h6" gutterBottom sx={{ mt: 5, mb: 2 }}>Career Averages</Typography>
+                                <Grid container spacing={2}>
+                                    {Object.entries(statsCategories).map(([category, stats], index) => (
+                                        <Grid item xs={12} sm={6} md={3} key={index}>
+                                            {renderTable(category, stats)}
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                                {playerData.lastNGamesStats.length > 0 && (
+                                    <>
+                                        <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>Last 10 Games Stats</Typography>
+                                        {renderLastNGamesTable()}
+                                    </>
+                                )}
+                            </>
+                        ) : (
+                            <Typography>No stats available</Typography>
+                        )}
                     </>
-                  )}
-                </>
-              ) : (
-                <Typography>No stats available</Typography>
-              )}
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+                )}
+            </DialogContent>
+        </Dialog>
     );
-  };
-  
-  export default PlayerProfile;
-  
+};
+
+export default PlayerProfile;
