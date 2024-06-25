@@ -197,7 +197,14 @@ const PlayerProfile = ({ playerId, season, seasonType, onClose }) => {
     const { perGameAverages } = playerData;
   
     const statsCategories = useMemo(() => ({
-      shootingStats: {
+      Main: {
+        MIN: perGameAverages?.MIN,
+        PTS: perGameAverages?.PTS,
+        AST: perGameAverages?.AST,
+        TOV: perGameAverages?.TOV,
+        Age: perGameAverages?.PLAYER_AGE,
+      },
+      Shooting: {
         FGM: perGameAverages?.FGM,
         FGA: perGameAverages?.FGA,
         FG_PCT: perGameAverages?.FG_PCT,
@@ -208,28 +215,21 @@ const PlayerProfile = ({ playerId, season, seasonType, onClose }) => {
         FTA: perGameAverages?.FTA,
         FT_PCT: perGameAverages?.FT_PCT,
       },
-      reboundingStats: {
+      Rebounding: {
         OREB: perGameAverages?.OREB,
         DREB: perGameAverages?.DREB,
         REB: perGameAverages?.REB,
       },
-      defensiveStats: {
+      Defensive: {
         STL: perGameAverages?.STL,
         BLK: perGameAverages?.BLK,
         PF: perGameAverages?.PF,
-      },
-      miscStats: {
-        MIN: perGameAverages?.MIN,
-        PTS: perGameAverages?.PTS,
-        AST: perGameAverages?.AST,
-        TOV: perGameAverages?.TOV,
-        Age: perGameAverages?.PLAYER_AGE,
       },
     }), [perGameAverages]);
   
     return (
         <Dialog open={Boolean(playerId)} onClose={onClose} maxWidth="lg" fullWidth>
-            <DialogTitle>{playerData.playerName} Player Stats</DialogTitle>
+            <DialogTitle variant="h4">{playerData.playerName} Player Stats</DialogTitle>
             <DialogContent>
                 {loading.main ? (
                     <CircularProgress />

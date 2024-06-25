@@ -48,6 +48,7 @@ The frontend is built using React and Material-UI for the UI components, and Cha
   - `SearchBar.js`: Component for searching players.
   - `PlayerList.js`: Component for displaying the list of players.
   - `PlayerProfile.js`: Component for displaying detailed player statistics and visualizations.
+  - `ShotChart.js`: Component for displaying shot distribution data per season.
 
 - **Styles**: Custom styles are applied using Material-UI's theming capabilities and CSS.
 

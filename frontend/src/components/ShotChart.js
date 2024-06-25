@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as d3 from 'd3';
 import { hexbin as d3Hexbin } from 'd3-hexbin';
-import { CircularProgress, Typography } from '@mui/material';
+import { CircularProgress, Typography, Box } from '@mui/material';
 
 const ShotChart = ({ playerId, season, seasonType }) => {
     const [shotData, setShotData] = useState([]);
@@ -26,10 +26,10 @@ const ShotChart = ({ playerId, season, seasonType }) => {
         }
     }, [playerId, season, seasonType]);
 
-    const courtWidth = 340;
-    const courtHeight = 320;
-    const xScale = d3.scaleLinear().domain([-250, 250]).range([0, courtWidth]);
-    const yScale = d3.scaleLinear().domain([-47.5, 422.5]).range([courtHeight, 0]);
+    const courtAspectRatio = 340 / 320;  // Width / Height aspect ratio
+
+    const xScale = d3.scaleLinear().domain([-250, 250]).range([0, 340]);
+    const yScale = d3.scaleLinear().domain([-47.5, 422.5]).range([320, 0]);
 
     useEffect(() => {
         if (shotData.length > 0) {
@@ -39,14 +39,14 @@ const ShotChart = ({ playerId, season, seasonType }) => {
 
             svg.append('image')
                 .attr('href', '/court.png')
-                .attr('width', courtWidth)
-                .attr('height', courtHeight);
+                .attr('width', 340)
+                .attr('height', 320);
 
             const hexbin = d3Hexbin()
                 .x(d => xScale(d.LOC_X))
                 .y(d => yScale(d.LOC_Y))
                 .radius(5)
-                .extent([[0, 0], [courtWidth, courtHeight]]);
+                .extent([[0, 0], [340, 320]]);
 
             const bins = hexbin(shotData);
 
@@ -64,20 +64,25 @@ const ShotChart = ({ playerId, season, seasonType }) => {
                 .attr('fill', d => color(d.length))
                 .attr('stroke', '#fff')
                 .attr('stroke-width', 0.5)
-                .attr('opacity', 100);
+                .attr('opacity', 1);
         }
     }, [shotData, xScale, yScale]);
 
     return (
-        <>
+        <Box sx={{ width: '100%', height: '0', paddingBottom: '94.12%', position: 'relative' }}>
             {loading ? (
                 <CircularProgress />
             ) : error ? (
                 <Typography variant="h6" color="error">{error}</Typography>
             ) : (
-                <svg id="shot-chart-svg" width={courtWidth} height={courtHeight}></svg>
+                <svg
+                    id="shot-chart-svg"
+                    viewBox="0 0 340 320"
+                    preserveAspectRatio="xMidYMid meet"
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                ></svg>
             )}
-        </>
+        </Box>
     );
 };
 
