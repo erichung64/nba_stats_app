@@ -249,10 +249,11 @@ const PlayerProfile = ({ playerId, season, seasonType, onClose }) => {
                                         )}
                                     </Grid>
                                     <Grid item xs={12} md={4}>
-                                        {renderChart("Shot Chart",
+                                        {renderChart(`Shot Chart (${season} - ${seasonType})`,
                                             <ShotChart playerId={playerId} season={season} seasonType={seasonType} width={280} height={300} />
                                         )}
                                     </Grid>
+
                                 </Grid>
                                 <Typography variant="h6" gutterBottom sx={{ mt: 5, mb: 2 }}>Career Averages</Typography>
                                 <Grid container spacing={2}>

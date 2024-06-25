@@ -26,8 +26,6 @@ const ShotChart = ({ playerId, season, seasonType }) => {
         }
     }, [playerId, season, seasonType]);
 
-    const courtAspectRatio = 340 / 320;  // Width / Height aspect ratio
-
     const xScale = d3.scaleLinear().domain([-250, 250]).range([0, 340]);
     const yScale = d3.scaleLinear().domain([-47.5, 422.5]).range([320, 0]);
 
@@ -40,13 +38,13 @@ const ShotChart = ({ playerId, season, seasonType }) => {
             svg.append('image')
                 .attr('href', '/court.png')
                 .attr('width', 340)
-                .attr('height', 320);
+                .attr('height', 319);
 
             const hexbin = d3Hexbin()
                 .x(d => xScale(d.LOC_X))
                 .y(d => yScale(d.LOC_Y))
                 .radius(5)
-                .extent([[0, 0], [340, 320]]);
+                .extent([[0, 0], [340, 319]]);
 
             const bins = hexbin(shotData);
 
